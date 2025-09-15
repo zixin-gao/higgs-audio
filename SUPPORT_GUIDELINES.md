@@ -3,8 +3,9 @@
 Thank you for your interest in this project! Before opening an issue, please take a moment to read the following guidelines:
 
 ## Self-Check First
-- Make sure you have **installed the correct version** of the package.
-- Check the README, documentation, and existing issues — many questions already have answers.
+- Write your question in **English** or include an English translation so the community can understand and assist you better.
+- Verify that you have **installed the correct version** of the package.
+- Check the GitHub [README](README.md), [Hugging Face Space](https://huggingface.co/spaces/smola/higgs_audio_v2), [Model Card](https://huggingface.co/bosonai/higgs-audio-v2-generation-3B-base) and existing issues — many questions already have answers.
 - Ensure your problem can be **reproduced** and is directly related to this project.
 
 ## Asking Properly
@@ -22,4 +23,4 @@ Thank you for your interest in this project! Before opening an issue, please tak
 ## Code of Conduct
 - Be **respectful and polite**.
 - Do not spam or repeatedly demand responses.
-- Off-topic or inappropriate questions may be closed.
+- Off-topic, vague, or inappropriate questions may be closed.
