@@ -1,45 +1,48 @@
 import os
 from generate_chat_audio import generate_audio
 
-# input/output setup
-text_file = "./discord_bot/LLM_generate/funny_script.txt"
-output_folder = "chat_audio_outputs"
-os.makedirs(output_folder, exist_ok=True)
 
-# voice mapping for each username
-VOICE_MAP = {
-    "Narrator": "narrator",
-    "lineee.xt": "lynn",
-    "a_licee": "alice",
-    "reee.na": "serena",
-    "richa._1": "richa", 
-}
+def run(text_str, audio_output_folder):
+    # input/output setup
+    # text_file = "./chats/chat_history.txt"
+    # output_folder = "chat_audio_outputs"
+    os.makedirs(audio_output_folder, exist_ok=True)
 
-# --- read the transcript ---
-with open(text_file, "r", encoding="utf-8") as f:
-    lines = f.readlines()
+    # voice mapping for each username
+    VOICE_MAP = {
+        "Narrator": "alice",
+        "lineee.xt": "lynn",
+        "a_licee": "alice",
+        "reee.na": "serena",
+        "richa._1": "richa", 
+    }
 
-index = 1
+    # --- read the transcript ---
+    lines = text_str.strip().split("\n")
 
-# --- parse and generate audio ---
-for line in lines:
-    line = line.strip()
-    if not line or not line.startswith("["):
-        continue  # skip empty lines or commentary
 
-    # extract username and message
-    if "]" in line:
-        username = line.split("]")[0][1:].strip()
-        message = line.split("]", 1)[1].strip().strip('"')
-    else:
-        continue
+    index = 1
 
-    # skip if no message or unknown user
-    if not message or username not in VOICE_MAP:
-        username = "Narrator"
+    # --- parse and generate audio ---
+    for line in lines:
+        line = line.strip()
+        if not line or not line.startswith("["):
+            continue  # skip empty lines or commentary
 
-    voice = VOICE_MAP[username]
+        # extract username and message
+        if "]" in line:
+            username = line.split("]")[0][1:].strip()
+            message = line.split("]", 1)[1].strip().strip('"')
+        else:
+            continue
 
-    print(f"Generating audio for {username}: {message}")
-    generate_audio(voice, message, output_folder, index)
-    index += 1
+        # skip if no message or unknown user
+        if not message or username not in VOICE_MAP:
+            username = "Narrator"
+
+        voice = VOICE_MAP[username]
+
+        print(f"Generating audio for {username}: {message}")
+        generate_audio(voice, message, audio_output_folder, index)
+        index += 1
+

@@ -1,3 +1,19 @@
+import multiple_chat_audios, merge_audios
+import os
+import subprocess
+
 def voiceover_script(funny_script):
-    """generates a wave file from the txt file when called, and puts into folder, returns true when done"""
+    """
+    Generates a wave file from the txt file when called, and puts it into folder.
+    Runs multiple_chat_audios.py -> merge_audios.py -> returns True when done.
+    """
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    audio_output_dir = os.path.join(base_dir, "audio_output")
+
+    multiple_chat_audios.run(funny_script, audio_output_dir)
+    print("[Voiceover] Starting voice generation pipeline...")
+
+    merge_audios.run(audio_output_dir, audio_output_dir+"/top5.wav")
+    print("[Voiceover] Top 5 generated")
+
     return True
