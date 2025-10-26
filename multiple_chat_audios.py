@@ -8,11 +8,11 @@ os.makedirs(output_folder, exist_ok=True)
 
 # voice mapping for each username
 VOICE_MAP = {
-    "Narrator": "serena",
+    "Narrator": "alice",
     "lineee.xt": "lynn",
     "a_licee": "alice",
     "reee.na": "serena",
-    "richa": "richa", 
+    "richa._1": "richa", 
 }
 
 # --- read the transcript ---
@@ -42,3 +42,4 @@ for line in lines:
 
     print(f"Generating audio for {username}: {message}")
     generate_audio(voice, message, output_folder, index)
+    index += 1

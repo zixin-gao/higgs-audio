@@ -4,7 +4,6 @@ import json
 
 def generate_audio(target_user, text, output_folder, prefix):
 
-    output_index = len([f for f in os.listdir(output_folder) if f.startswith(target_user)])
     output_path = os.path.join(output_folder, f"{prefix}_{target_user}.wav")
     
     print(f"Generating audio for {target_user}: {text}")
