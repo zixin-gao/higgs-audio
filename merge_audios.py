@@ -2,7 +2,7 @@ import os
 from pydub import AudioSegment
 
 input_folder = "chat_audio_outputs"
-output_file = os.path.join(input_folder, "merged_chat.wav")
+output_file = os.path.join("audio_output", "top5.wav")
 
 # --- collect and sort wav files by numeric prefix ---
 wav_files = [f for f in os.listdir(input_folder) if f.lower().endswith(".wav")]

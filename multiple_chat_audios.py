@@ -2,13 +2,13 @@ import os
 from generate_chat_audio import generate_audio
 
 # input/output setup
-text_file = "./chats/chat_history.txt"
+text_file = "./discord_bot/LLM_generate/funny_script.txt"
 output_folder = "chat_audio_outputs"
 os.makedirs(output_folder, exist_ok=True)
 
 # voice mapping for each username
 VOICE_MAP = {
-    "Narrator": "alice",
+    "Narrator": "narrator",
     "lineee.xt": "lynn",
     "a_licee": "alice",
     "reee.na": "serena",
