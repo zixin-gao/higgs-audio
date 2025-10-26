@@ -1,30 +1,23 @@
 import os
-from examples.generation import main as higgs_main
+import subprocess
 import json
 
-json_file = "./chats/chat_history.json"
-ref_audio = "./sample_voices/richa/richa.wav"
-ref_text = './sample_voices/richa/richa.txt'
-output_folder = "chat_audio_outputs"
-os.makedirs(output_folder, exist_ok=True)
+def generate_audio(target_user, text, output_folder):
 
-# Load chat messages
-with open(json_file, "r", encoding="utf-8") as f:
-    chat_data = json.load(f)
+    output_index = len([f for f in os.listdir(output_folder) if f.startswith(target_user)])
+    output_path = os.path.join(output_folder, f"{output_index}_{target_user}.wav")
+    
+    print(f"Generating audio for {target_user}: {text}")
 
-# Iterate over messages and generate audio
-user_messages = [msg["text"] for msg in chat_data if msg["user"] == 'richa']
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.path.abspath(".")
 
-for i, text in enumerate(user_messages):
-    print(f"Generating audio for richa: {text}")
-    output_path = os.path.join(output_folder, f"{i}_richa.wav")
-
-    higgs_main(
-        [
+    subprocess.run([
+        "python", "examples/generation.py",
         f"--transcript={text}",
-        f"--ref_audio={'richa'}",
+        f"--ref_audio={target_user}",
         f"--out_path={output_path}",
-        ]
-    )
+        ], env=env, check=True)
 
     print(f"Saved audio to {output_path}")
+    return output_folder
