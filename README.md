@@ -19,3 +19,15 @@ We had an incredible time working together on LARS. Next steps might include giv
 
 ### 🙏 Acknowledgements
 Many thanks to the Boson AI team for giving us this opportunity to use their awesome open-source model and for this whole hackathon, and especially to our instructor [Murdock Aubry](https://murdockaubry.com/) for encouraging us to join and for his support along the way.
+
+# 🔗 Video demo
+<a href="https://youtu.be/pQ3ZEhj0Lqc?si=pvyMVHSEgPmaUKkl" title="video text"><img width="750" height="600" src="images/thumbnail.png"></a>
+
+▶️ https://youtu.be/pQ3ZEhj0Lqc?si=pvyMVHSEgPmaUKkl
+
+# Screenshots
+<img width="750" height="600" alt="image" src="images/1.png" />
+<img width="750" height="600" alt="image" src="images/2.png" />
+<img width="750" height="600" alt="image" src="images/3.png" />
+
+
