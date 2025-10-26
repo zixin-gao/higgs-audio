@@ -18,7 +18,7 @@ from voiceover_module import voiceover_script  # adjust this later with the modu
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
-handler = logging.FileHandler(filename='./higgs-audio/discord_bot/logging_data/discord.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='./discord_bot/logging_data/discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 
 # manually enable the intents
@@ -30,14 +30,14 @@ intents.voice_states = True
 # paths
 today = datetime.now().strftime("%Y-%m-%d")
 
-logs_dir = "./higgs-audio/discord_bot/logs"
+logs_dir = "./discord_bot/logs"
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 
 log_file_path = f"{logs_dir}/messages_{today}.json"
-audio_file_path = "./higgs-audio/audio_output/top5.wav"
-script_path = "./higgs-audio/discord_bot/LLM_generate/funny_script.txt"
-bot_text_path = "./higgs-audio/discord_bot/logging_data/bot_message.txt"
+audio_file_path = "./audio_final/top5.wav"
+script_path = "./discord_bot/LLM_generate/funny_script.txt"
+bot_text_path = "./discord_bot/logging_data/bot_message.txt"
 
 def get_reactions_data(message):
     reactions = []
@@ -132,14 +132,14 @@ async def start_wrapper(ctx):
     await ctx.send("🔄 Generating funny script from today's conversation...")
 
     try:
-        result = subprocess.run([sys.executable, "./higgs-audio/discord_bot/LLM_generate/wrapper.py"],
+        result = subprocess.run([sys.executable, "./discord_bot/LLM_generate/wrapper.py"],
                                 capture_output=True, text=True, cwd=os.getcwd())
         
         if result.returncode == 0:
             await ctx.send("✅ Funny script generated successfully!")
         
         # Check if script file was created
-            script_path = "./higgs-audio/discord_bot/LLM_generate/funny_script.txt"
+            script_path = "./discord_bot/LLM_generate/funny_script.txt"
             if os.path.exists(script_path):
                 await ctx.send("📝 Script saved")
                 
