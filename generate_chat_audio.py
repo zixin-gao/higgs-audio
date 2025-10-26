@@ -2,10 +2,10 @@ import os
 import subprocess
 import json
 
-def generate_audio(target_user, text, output_folder):
+def generate_audio(target_user, text, output_folder, prefix):
 
     output_index = len([f for f in os.listdir(output_folder) if f.startswith(target_user)])
-    output_path = os.path.join(output_folder, f"{output_index}_{target_user}.wav")
+    output_path = os.path.join(output_folder, f"{prefix}_{target_user}.wav")
     
     print(f"Generating audio for {target_user}: {text}")
 
@@ -21,3 +21,4 @@ def generate_audio(target_user, text, output_folder):
 
     print(f"Saved audio to {output_path}")
     return output_folder
+
