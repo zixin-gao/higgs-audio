@@ -1,11 +1,8 @@
 import os
-from generate_chat_audio import generate_audio
+from audio.single_chat_audio import generate_audio
 
 
 def run(text_str, audio_output_folder):
-    # input/output setup
-    # text_file = "./chats/chat_history.txt"
-    # output_folder = "chat_audio_outputs"
     os.makedirs(audio_output_folder, exist_ok=True)
 
     # voice mapping for each username

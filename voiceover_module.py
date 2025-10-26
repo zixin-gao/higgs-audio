@@ -1,4 +1,4 @@
-import multiple_chat_audios, merge_audios
+import audio.multiple_chat_audios, audio.merge_audios
 import os
 import subprocess
 
@@ -14,7 +14,7 @@ def voiceover_script(funny_script):
     # multiple_chat_audios.run(funny_script, audio_output_dir)
     # print("[Voiceover] Starting voice generation pipeline...")
 
-    merge_audios.run(audio_output_dir, final_merged_audio)
+    audio.merge_audios.run(audio_output_dir, final_merged_audio)
     print("[Voiceover] Top 5 generated")
 
     return True
