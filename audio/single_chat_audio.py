@@ -11,7 +11,7 @@ def generate_audio(target_user, text, output_folder, prefix):
     env["PYTHONPATH"] = os.path.abspath(".")
 
     subprocess.run([
-        "python", "generation.py",
+        "python", "./audio/generation.py",
         f"--transcript={text}",
         f"--ref_audio={target_user}",
         f"--out_path={output_path}",

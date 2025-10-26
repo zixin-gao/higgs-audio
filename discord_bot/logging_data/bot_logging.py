@@ -36,7 +36,7 @@ def run_discord_bot():
         os.makedirs(logs_dir)
 
     log_file_path = f"{logs_dir}/messages_{today}.json"
-    audio_file_path = "./audio_final/top5.wav"
+    audio_file_path = "./outputs/final_output/top5.wav"
     script_path = "./discord_bot/LLM_generate/funny_script.txt"
     bot_text_path = "./discord_bot/logging_data/bot_message.txt"
 
@@ -129,28 +129,18 @@ def run_discord_bot():
 
     @bot.command(name='start')
     async def start_wrapper(ctx):
-        """Generate the funny script from today's conversation"""
-        await ctx.send("🔄 Generating funny script from today's conversation...")
+        """Generate voiceover from the existing script"""
+        await ctx.send("🎙️ Starting voiceover generation from existing script...")
 
         try:
-            result = subprocess.run([sys.executable, "./discord_bot/LLM_generate/wrapper.py"],
-                                    capture_output=True, text=True, cwd=os.getcwd())
-            
-            if result.returncode == 0:
-                await ctx.send("✅ Funny script generated successfully!")
-            
-            # Check if script file was created
-                script_path = "./discord_bot/LLM_generate/funny_script.txt"
-                if os.path.exists(script_path):
-                    await ctx.send("📝 Script saved")
-                    
-                    # Now trigger the voiceover generation
-                    await ctx.send("🎙️ Starting voiceover generation...")
-                    await generate_voiceover(ctx)
-                else:
-                    await ctx.send("❌ Script file was not created")
+            # Check if script file exists
+            if os.path.exists(script_path):
+                await ctx.send("📝 Found existing script, generating voiceover...")
+                
+                # Trigger the voiceover generation directly
+                await generate_voiceover(ctx)
             else:
-                await ctx.send(f"❌ Error generating script: {result.stderr}")
+                await ctx.send("❌ Script file not found. Please make sure funny_script.txt exists.")
                 
         except Exception as e:
             await ctx.send(f"❌ Unexpected error: {e}")
@@ -162,11 +152,13 @@ def run_discord_bot():
                 with open(script_path, 'r', encoding='utf-8') as f:
                     script_content = f.read()
                 
+                await ctx.send(f"📖 Script loaded ({len(script_content)} characters)")
+                
                 # call the voiceover function
                 done = voiceover_script(script_content)
                 
                 if done:
-                    await ctx.send("🎉 Ready to play! Join VC and use `!playtop5` to listen.")
+                    await ctx.send("🎉 Voiceover generated successfully! Ready to play! Join VC and use `!playtop5` to listen.")
                 else:
                     await ctx.send("❌ Voiceover generation failed - no output file created")
             else:
@@ -188,7 +180,7 @@ def run_discord_bot():
         # Check if the audio file exists
         if not os.path.exists(audio_file_path):
             await ctx.send(f"❌ Audio file not found: {audio_file_path}")
-            await ctx.send("Please make sure the WAV file exists in the correct location.")
+            await ctx.send("Please generate the voiceover first using `!start`")
             return
         
         voice_channel = ctx.author.voice.channel

@@ -17,8 +17,8 @@ def voiceover_script(funny_script):
 
     final_audio_path = os.path.join(final_audio_dir, "top5.wav")
 
-    # multiple_chat_audios.run(funny_script, audio_output_dir)
-    # print("[Voiceover] Starting voice generation pipeline...")
+    audio.multiple_chat_audios.run(funny_script, raw_output_dir)
+    print("[Voiceover] Starting voice generation pipeline...")
 
     audio.merge_audios.run(raw_output_dir, final_audio_path)
     print("[Voiceover] Top 5 generated")
