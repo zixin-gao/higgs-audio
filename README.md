@@ -25,7 +25,7 @@ Many thanks to the Boson AI team for giving us this opportunity to use their awe
 
 ▶️ https://youtu.be/pQ3ZEhj0Lqc?si=pvyMVHSEgPmaUKkl
 
-# Screenshots
+# 🔍 Explore the Functionalities!
 <img width="750" height="600" alt="image" src="images/1.png" />
 <img width="750" height="600" alt="image" src="images/2.png" />
 <img width="750" height="600" alt="image" src="images/3.png" />
