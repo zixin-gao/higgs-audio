@@ -15,7 +15,7 @@ client = openai.Client(
 
 def get_today_conversation():
     today = datetime.now().strftime("%Y-%m-%d")
-    log_file = f"./higgs-audio/discord_bot/logs/messages_{today}.json"
+    log_file = f"./discord_bot/logs/messages_{today}.json"
 
     if not os.path.exists(log_file):
         return "No conversations today."
@@ -42,7 +42,7 @@ def write_script_to_file(script):
     cleaned_script = '\n'.join([line for line in cleaned_script.split('\n') if line.strip()])
     
     # Create scripts directory if it doesn't exist
-    scripts_dir = "./higgs-audio/discord_bot/LLM_generate"
+    scripts_dir = "./discord_bot/LLM_generate"
     if not os.path.exists(scripts_dir):
         os.makedirs(scripts_dir)
     

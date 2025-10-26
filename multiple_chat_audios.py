@@ -10,7 +10,7 @@ def run(text_str, audio_output_folder):
 
     # voice mapping for each username
     VOICE_MAP = {
-        "Narrator": "alice",
+        "Narrator": "narrator",
         "lineee.xt": "lynn",
         "a_licee": "alice",
         "reee.na": "serena",
