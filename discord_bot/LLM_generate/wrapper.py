@@ -2,7 +2,11 @@ import openai
 import os
 import json
 from datetime import datetime
+import re
+from dotenv import load_dotenv 
 
+load_dotenv()
+BOSON_API_KEY = os.getenv("BOSON_API_KEY")
 
 client = openai.Client(
     api_key=BOSON_API_KEY,
@@ -31,6 +35,28 @@ def get_today_conversation():
     
     return conversation_text
 
+def write_script_to_file(script):
+    """Write the generated script to a text file with timestamp, removing <think> tags"""
+    # Remove content between and including <think> tags
+    cleaned_script = re.sub(r'<think>.*?</think>', '', script, flags=re.DOTALL)
+    cleaned_script = '\n'.join([line for line in cleaned_script.split('\n') if line.strip()])
+    
+    # Create scripts directory if it doesn't exist
+    scripts_dir = "./higgs-audio/discord_bot/LLM_generate"
+    if not os.path.exists(scripts_dir):
+        os.makedirs(scripts_dir)
+    
+
+    filename = f"{scripts_dir}/funny_script.txt"
+    
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(cleaned_script)
+        return filename
+    except Exception as e:
+        print(f"❌ Error writing script to file: {e}")
+        return None
+
 conversation_text = get_today_conversation()
 response = client.chat.completions.create(
     model="Qwen3-32B-thinking-Hackathon", 
@@ -42,4 +68,5 @@ response = client.chat.completions.create(
     temperature=0.7
 )
 
-print(response.choices[0].message.content)
+script = response.choices[0].message.content
+write_script_to_file(script)

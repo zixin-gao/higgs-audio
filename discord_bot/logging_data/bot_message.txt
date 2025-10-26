@@ -1,0 +1,17 @@
+👋 Hello!
+I’m LoudLARS, a bot designed to make a fun 🎙️ podcast out of YOUR server conversations — starring YOU! 🌟
+You can see some of my commands below:
+
+> ``!start`` ▶️
+> I’ll check your messages, analyze them, and start putting the podcast together! This might take a few minutes, but I’ll notify you when I’m done. 
+        
+> ``!playtop5`` 🎧
+> Once I’m finished, join a VC and send this command — I’ll join and play the podcast for you and your friends!
+        
+> ``!leave`` 🏃💨
+> I’ll leave automatically when I’m done playing your podcast, but if you want me out sooner, just use this command (don’t worry, I won’t be offended 😄).
+
+> ``!reset`` 🔄
+> My log will be cleared, and future podcasts will be made from a blank slate.
+        
+If you ever need a reminder of these commands, just @mention me! Good luck, and I can’t wait to see what you create! 🚀
