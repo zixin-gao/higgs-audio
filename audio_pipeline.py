@@ -1,8 +1,43 @@
 import os
-from generate_chat_audio import generate_audio
 import torch
 from examples.generation import HiggsAudioModelClient
 from boson_multimodal.audio_processing.higgs_audio_tokenizer import load_higgs_audio_tokenizer
+from examples.generation import main as generate_main, main_new
+
+
+def generate_audio(voice, text, output_folder, index, model_client, model_path):
+    output_path = os.path.join(output_folder, f"{index}_{voice}.wav")
+    print(f"Generating audio for {voice}: {text}")
+
+    # build args for the function
+    main_new(
+        model_client=model_client,
+        model_path=model_path,
+        audio_tokenizer=model_client._audio_tokenizer,
+        max_new_tokens=model_client._max_new_tokens,
+        transcript=text,
+        scene_prompt=None,
+        temperature=0.7,
+        top_k=50,
+        top_p=0.95,
+        ras_win_len=None,
+        ras_win_max_num_repeat=None,
+        ref_audio=voice,
+        ref_audio_in_system_message=True,
+        chunk_method="none",
+        chunk_max_word_num=0,
+        chunk_max_num_turns=0,
+        generation_chunk_buffer_size=0,
+        seed=42,
+        device_id=model_client._device_id,
+        out_path=output_path,
+        use_static_kv_cache=True,
+        device=model_client._device,
+    )
+
+    print(f"Saved audio to {output_path}")
+    return output_path
+
 
 # input/output setup
 text_file = "./chats/chat_history.txt"
@@ -11,7 +46,7 @@ os.makedirs(output_folder, exist_ok=True)
 
 # voice mapping for each username
 VOICE_MAP = {
-    "Narrator": "serena",
+    "Narrator": "Narrator",
     "lineee.xt": "lynn",
     "a_licee": "alice",
     "reee.na": "serena",

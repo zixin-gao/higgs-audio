@@ -219,6 +219,7 @@ class HiggsAudioModelClient:
         self._kv_cache_lengths = kv_cache_lengths
         self._use_static_kv_cache = use_static_kv_cache
 
+        self._device_id = device_id
         self._tokenizer = AutoTokenizer.from_pretrained(model_path)
         self._config = AutoConfig.from_pretrained(model_path)
         self._max_new_tokens = max_new_tokens
@@ -624,6 +625,7 @@ def prepare_generation_context(scene_prompt, ref_audio, ref_audio_in_system_mess
 )
 def main(
     model_path,
+    model_client,
     audio_tokenizer,
     max_new_tokens,
     transcript,
@@ -645,44 +647,44 @@ def main(
     use_static_kv_cache,
     device,
 ):
-    # specifying a device_id implies CUDA
-    if device_id is None:
-        if device == "auto":
-            if torch.cuda.is_available():
-                device_id = 0
-                device = "cuda:0"
-            elif torch.backends.mps.is_available():
-                device_id = None  # MPS doesn't use device IDs like CUDA
-                device = "mps"
-            else:
-                device_id = None
-                device = "cpu"
-        elif device == "cuda":
-            device_id = 0
-            device = "cuda:0"
-        elif device == "mps":
-            device_id = None
-            device = "mps"
-        else:
-            device_id = None
-            device = "cpu"
-    else:
-        device = f"cuda:{device_id}"
-    # For MPS, use CPU for audio tokenizer due to embedding operation limitations
-    audio_tokenizer_device = "cpu" if device == "mps" else device
-    audio_tokenizer = load_higgs_audio_tokenizer(audio_tokenizer, device=audio_tokenizer_device)
+    # # specifying a device_id implies CUDA
+    # if device_id is None:
+    #     if device == "auto":
+    #         if torch.cuda.is_available():
+    #             device_id = 0
+    #             device = "cuda:0"
+    #         elif torch.backends.mps.is_available():
+    #             device_id = None  # MPS doesn't use device IDs like CUDA
+    #             device = "mps"
+    #         else:
+    #             device_id = None
+    #             device = "cpu"
+    #     elif device == "cuda":
+    #         device_id = 0
+    #         device = "cuda:0"
+    #     elif device == "mps":
+    #         device_id = None
+    #         device = "mps"
+    #     else:
+    #         device_id = None
+    #         device = "cpu"
+    # else:
+    #     device = f"cuda:{device_id}"
+    # # For MPS, use CPU for audio tokenizer due to embedding operation limitations
+    # audio_tokenizer_device = "cpu" if device == "mps" else device
+    # audio_tokenizer = load_higgs_audio_tokenizer(audio_tokenizer, device=audio_tokenizer_device)
 
-    # Disable static KV cache on MPS since it relies on CUDA graphs
-    if device == "mps" and use_static_kv_cache:
-        use_static_kv_cache = False
-    model_client = HiggsAudioModelClient(
-        model_path=model_path,
-        audio_tokenizer=audio_tokenizer,
-        device=device,
-        device_id=device_id,
-        max_new_tokens=max_new_tokens,
-        use_static_kv_cache=use_static_kv_cache,
-    )
+    # # Disable static KV cache on MPS since it relies on CUDA graphs
+    # if device == "mps" and use_static_kv_cache:
+    #     use_static_kv_cache = False
+    # model_client = HiggsAudioModelClient(
+    #     model_path=model_path,
+    #     audio_tokenizer=audio_tokenizer,
+    #     device=device,
+    #     device_id=device_id,
+    #     max_new_tokens=max_new_tokens,
+    #     use_static_kv_cache=use_static_kv_cache,
+    # )
 
     pattern = re.compile(r"\[(SPEAKER\d+)\]")
 
@@ -764,5 +766,128 @@ def main(
     logger.info(f"Wav file is saved to '{out_path}' with sample rate {sr}")
 
 
+def main_new(
+    model_client,
+    model_path,
+    audio_tokenizer,
+    max_new_tokens,
+    transcript,
+    scene_prompt,
+    temperature,
+    top_k,
+    top_p,
+    ras_win_len,
+    ras_win_max_num_repeat,
+    ref_audio,
+    ref_audio_in_system_message,
+    chunk_method,
+    chunk_max_word_num,
+    chunk_max_num_turns,
+    generation_chunk_buffer_size,
+    seed,
+    device_id,
+    out_path,
+    use_static_kv_cache,
+    device,
+):
+
+    pattern = re.compile(r"\[(SPEAKER\d+)\]")
+
+    # --- load transcript ---
+    if os.path.exists(transcript):
+        logger.info(f"Loading transcript from {transcript}")
+        with open(transcript, "r", encoding="utf-8") as f:
+            transcript = f.read().strip()
+
+    # --- load scene prompt ---
+    if scene_prompt is not None and scene_prompt != "empty" and os.path.exists(scene_prompt):
+        with open(scene_prompt, "r", encoding="utf-8") as f:
+            scene_prompt = f.read().strip()
+    else:
+        scene_prompt = None
+
+    # --- find speakers and normalize text ---
+    speaker_tags = sorted(set(pattern.findall(transcript)))
+
+    logger.info("Normalizing transcript...")
+    for step in tqdm.tqdm(range(1), desc="Normalizing text", leave=False):
+        transcript = normalize_chinese_punctuation(transcript)
+        transcript = transcript.replace("(", " ")
+        transcript = transcript.replace(")", " ")
+        transcript = transcript.replace("°F", " degrees Fahrenheit")
+        transcript = transcript.replace("°C", " degrees Celsius")
+
+    # --- replace tags with SE markers ---
+    logger.info("Replacing speaker and sound tags...")
+    replacements = [
+        ("[laugh]", "<SE>[Laughter]</SE>"),
+        ("[humming start]", "<SE_s>[Humming]</SE_s>"),
+        ("[humming end]", "<SE_e>[Humming]</SE_e>"),
+        ("[music start]", "<SE_s>[Music]</SE_s>"),
+        ("[music end]", "<SE_e>[Music]</SE_e>"),
+        ("[music]", "<SE>[Music]</SE>"),
+        ("[sing start]", "<SE_s>[Singing]</SE_s>"),
+        ("[sing end]", "<SE_e>[Singing]</SE_e>"),
+        ("[applause]", "<SE>[Applause]</SE>"),
+        ("[cheering]", "<SE>[Cheering]</SE>"),
+        ("[cough]", "<SE>[Cough]</SE>"),
+    ]
+    for tag, replacement in tqdm.tqdm(replacements, desc="Applying replacements", leave=False):
+        transcript = transcript.replace(tag, replacement)
+
+    # --- cleanup lines ---
+    lines = transcript.split("\n")
+    transcript = "\n".join([" ".join(line.split()) for line in lines if line.strip()])
+    transcript = transcript.strip()
+    if not any([transcript.endswith(c) for c in [".", "!", "?", ",", ";", '"', "'", "</SE_e>", "</SE>"]]):
+        transcript += "."
+
+    # --- prepare context and chunks ---
+    logger.info("Preparing generation context...")
+    messages, audio_ids = prepare_generation_context(
+        scene_prompt=scene_prompt,
+        ref_audio=ref_audio,
+        ref_audio_in_system_message=ref_audio_in_system_message,
+        audio_tokenizer=audio_tokenizer,
+        speaker_tags=speaker_tags,
+    )
+
+    logger.info("Preparing chunked text...")
+    chunked_text = prepare_chunk_text(
+        transcript,
+        chunk_method=chunk_method,
+        chunk_max_word_num=chunk_max_word_num,
+        chunk_max_num_turns=chunk_max_num_turns,
+    )
+
+    # --- log chunks ---
+    logger.info("Chunks used for generation:")
+    for idx, chunk_text in enumerate(tqdm.tqdm(chunked_text, desc="Logging chunks", leave=False)):
+        logger.info(f"Chunk {idx}:")
+        logger.info(chunk_text)
+        logger.info("-----")
+
+    # --- generation step with progress bar ---
+    logger.info("Starting model generation...")
+    for _ in tqdm.tqdm(range(1), desc="Generating audio", leave=True):
+        concat_wv, sr, text_output = model_client.generate(
+            messages=messages,
+            audio_ids=audio_ids,
+            chunked_text=chunked_text,
+            generation_chunk_buffer_size=generation_chunk_buffer_size,
+            temperature=temperature,
+            top_k=top_k,
+            top_p=top_p,
+            ras_win_len=ras_win_len,
+            ras_win_max_num_repeat=ras_win_max_num_repeat,
+            seed=seed,
+        )
+
+    # --- write output ---
+    sf.write(out_path, concat_wv, sr)
+    logger.info(f"Wav file is saved to '{out_path}' with sample rate {sr}")
+
+
+
 if __name__ == "__main__":
-    main()
+    main_new()
